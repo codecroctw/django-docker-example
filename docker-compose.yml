@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  django:
+    build: django
+    ports:
+      - '8000:8000'
+    volumes:
+      - ./django:/app
+    env_file: ./django/.env
+    command: python manage.py runserver 0.0.0.0:8000
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:11
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - codecroc-demo-django-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5 
+
+
+volumes:
+  codecroc-demo-django-db:
